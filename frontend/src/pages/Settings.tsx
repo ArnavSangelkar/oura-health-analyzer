@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Key, Database, Bell, Save, CheckCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Key, Save, CheckCircle } from 'lucide-react';
 import { supabase } from '../utils/api';
 
 const Settings: React.FC = () => {
-  const [settings, setSettings] = useState({
-    notifications: true,
-    autoRefresh: true,
-    dataRetention: '30',
-    theme: 'light'
-  });
-  
   const [ouraToken, setOuraToken] = useState('');
-  const [openaiKey, setOpenaiKey] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -36,10 +28,6 @@ const Settings: React.FC = () => {
     } catch (error) {
       console.error('Error loading user settings:', error);
     }
-  };
-
-  const handleSettingChange = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
   };
 
   const saveSettings = async () => {
@@ -119,7 +107,7 @@ const Settings: React.FC = () => {
           Settings
         </h1>
         <p className="text-gray-600">
-          Configure your health analyzer preferences
+          Configure your Oura Ring API token
         </p>
       </div>
 
@@ -127,7 +115,7 @@ const Settings: React.FC = () => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
           <Key className="h-5 w-5 mr-2 text-blue-600" />
-          API Configuration
+          Oura Ring API Configuration
         </h2>
         <div className="space-y-4">
           <div>
@@ -143,21 +131,6 @@ const Settings: React.FC = () => {
             />
             <p className="text-sm text-gray-500 mt-1">
               Get your token from the Oura Cloud dashboard
-            </p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              OpenAI API Key
-            </label>
-            <input
-              type="password"
-              value={openaiKey}
-              onChange={(e) => setOpenaiKey(e.target.value)}
-              placeholder="Enter your OpenAI API key"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <p className="text-sm text-gray-500 mt-1">
-              Required for AI-powered insights
             </p>
           </div>
           
@@ -196,124 +169,6 @@ const Settings: React.FC = () => {
             </button>
           </div>
         </div>
-      </div>
-
-      {/* Preferences */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-          <Bell className="h-5 w-5 mr-2 text-blue-600" />
-          Preferences
-        </h2>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Notifications</h3>
-              <p className="text-sm text-gray-500">Receive alerts for health insights</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.notifications}
-                onChange={(e) => handleSettingChange('notifications', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Auto Refresh</h3>
-              <p className="text-sm text-gray-500">Automatically update data every hour</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.autoRefresh}
-                onChange={(e) => handleSettingChange('autoRefresh', e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Data Retention (days)
-            </label>
-            <select
-              value={settings.dataRetention}
-              onChange={(e) => handleSettingChange('dataRetention', e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="7">7 days</option>
-              <option value="30">30 days</option>
-              <option value="90">90 days</option>
-              <option value="365">1 year</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Theme
-            </label>
-            <select
-              value={settings.theme}
-              onChange={(e) => handleSettingChange('theme', e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="auto">Auto</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      {/* Data Management */}
-      <div className="card">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
-          <Database className="h-5 w-5 mr-2 text-blue-600" />
-          Data Management
-        </h2>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Export Data</h3>
-              <p className="text-sm text-gray-500">Download your health data as CSV</p>
-            </div>
-            <button className="btn-secondary">
-              Export
-            </button>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">Clear Cache</h3>
-              <p className="text-sm text-gray-500">Remove cached data to free up space</p>
-            </div>
-            <button className="btn-secondary">
-              Clear
-            </button>
-          </div>
-          
-          <div className="flex items-center justify-between p-4 bg-red-50 rounded-lg">
-            <div>
-              <h3 className="text-sm font-medium text-red-900">Delete All Data</h3>
-              <p className="text-sm text-red-600">Permanently remove all stored data</p>
-            </div>
-            <button className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200">
-              Delete
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <button className="btn-primary">
-          Save Settings
-        </button>
       </div>
     </div>
   );
