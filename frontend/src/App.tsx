@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { supabase } from './utils/api';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import HealthData from './pages/HealthData';
@@ -52,12 +53,15 @@ function App() {
     }
   };
 
-  const handleAuthSuccess = (userData: any, token: string) => {
+  const handleAuthSuccess = async (userData: any, token: string) => {
     setUser(userData);
     localStorage.setItem('authToken', token);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Sign out from Supabase (for any remaining Supabase features)
+    await supabase.auth.signOut();
+    
     setUser(null);
     localStorage.removeItem('authToken');
   };

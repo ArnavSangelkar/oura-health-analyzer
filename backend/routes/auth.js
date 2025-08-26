@@ -256,6 +256,47 @@ router.get('/profile', (req, res) => {
   }
 });
 
+// Get user profile for Supabase sync
+router.get('/profile-for-supabase', async (req, res) => {
+  try {
+    // Get token from header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ 
+        error: 'No token provided' 
+      });
+    }
+
+    const token = authHeader.substring(7);
+    
+    // Verify our JWT token
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = users.find(u => u.id === decoded.userId);
+    
+    if (!user) {
+      return res.status(404).json({ 
+        error: 'User not found' 
+      });
+    }
+
+    // Return user profile data that can be used to sync with Supabase
+    res.json({
+      user: {
+        id: user.id.toString(),
+        email: user.email,
+        created_at: user.createdAt,
+        updated_at: user.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Profile error:', error);
+    res.status(401).json({ 
+      error: 'Invalid token' 
+    });
+  }
+});
+
 // Debug endpoint (remove in production)
 router.get('/debug', (req, res) => {
   res.json({

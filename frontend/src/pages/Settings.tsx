@@ -21,16 +21,32 @@ const Settings: React.FC = () => {
 
   const loadUserSettings = async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('oura_token')
-          .eq('id', user.id)
-          .single();
-        
-        if (profile?.oura_token) {
-          setOuraToken(profile.oura_token);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        console.error('No auth token found');
+        return;
+      }
+
+      const apiBaseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+      
+      const response = await fetch(`${apiBaseUrl}/api/settings`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.settings) {
+          setOuraToken(data.settings.ouraToken || '');
+          setOpenaiKey(data.settings.openaiKey || '');
+          setSettings(prev => ({
+            ...prev,
+            ...data.settings
+          }));
         }
       }
     } catch (error) {
@@ -52,21 +68,36 @@ const Settings: React.FC = () => {
     setMessage(null);
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('User not authenticated');
 
-      // Update the profile with the Oura token
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          email: user.email,
-          oura_token: ouraToken.trim(),
-          updated_at: new Date().toISOString()
-        });
+      const apiBaseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+      
+      // Save settings to our backend
+      const response = await fetch(`${apiBaseUrl}/api/settings`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ouraToken: ouraToken.trim(),
+          openaiKey: openaiKey.trim(),
+          notifications: settings.notifications,
+          autoRefresh: settings.autoRefresh,
+          dataRetention: settings.dataRetention,
+          theme: settings.theme
+        })
+      });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to save settings');
+      }
 
+      const data = await response.json();
       setMessage({ type: 'success', text: 'Settings saved successfully! Your Oura token is now configured.' });
       
       // Clear the message after 5 seconds
@@ -88,13 +119,21 @@ const Settings: React.FC = () => {
     setMessage(null);
 
     try {
-      // Test the Oura API connection by calling our Edge Function
-      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL || 'https://lgjjzpgnrjzbdcxbkcxh.supabase.co'}/functions/v1/oura-service/latest`, {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('User not authenticated');
+
+      const apiBaseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+      
+      // Test Oura API connection through our backend
+      const response = await fetch(`${apiBaseUrl}/api/settings/test-oura`, {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
-          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXVdK6w45bgMQLlYmPhQXVAw',
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ ouraToken: ouraToken.trim() })
       });
 
       if (response.ok) {

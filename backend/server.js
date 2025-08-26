@@ -16,6 +16,7 @@ const ouraRoutes = require('./routes/oura');
 const aiRoutes = require('./routes/ai');
 const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
+const settingsRoutes = require('./routes/settings');
 
 // Security middleware
 app.use(helmet({
@@ -90,6 +91,7 @@ app.use('/api/oura', ouraRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Serve React app in production
 if (process.env.NODE_ENV === 'production') {
