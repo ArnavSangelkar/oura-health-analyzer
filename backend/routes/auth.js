@@ -42,21 +42,34 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 // Sign up endpoint
 router.post('/signup', async (req, res) => {
   try {
-    console.log('Signup request body:', req.body);
+    console.log('=== SIGNUP REQUEST START ===');
+    console.log('Request headers:', req.headers);
+    console.log('Request body:', req.body);
+    console.log('Request body type:', typeof req.body);
+    console.log('Request body keys:', Object.keys(req.body || {}));
+    
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
       console.log('Signup failed: Missing email or password');
+      console.log('Email value:', email);
+      console.log('Password value:', password);
+      console.log('Email type:', typeof email);
+      console.log('Password type:', typeof password);
       return res.status(400).json({ 
-        error: 'Email and password are required' 
+        error: 'Email and password are required',
+        received: { email: !!email, password: !!password },
+        body: req.body
       });
     }
 
     if (password.length < 6) {
       console.log('Signup failed: Password too short');
+      console.log('Password length:', password.length);
       return res.status(400).json({ 
-        error: 'Password must be at least 6 characters long' 
+        error: 'Password must be at least 6 characters long',
+        passwordLength: password.length
       });
     }
 
@@ -68,6 +81,8 @@ router.post('/signup', async (req, res) => {
         error: 'User with this email already exists' 
       });
     }
+
+    console.log('Validation passed, creating user...');
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -92,6 +107,7 @@ router.post('/signup', async (req, res) => {
       { expiresIn: '24h' }
     );
 
+    console.log('=== SIGNUP REQUEST SUCCESS ===');
     res.status(201).json({
       message: 'User created successfully',
       user: { id: user.id, email: user.email },
@@ -100,8 +116,10 @@ router.post('/signup', async (req, res) => {
 
   } catch (error) {
     console.error('Signup error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ 
-      error: 'Internal server error' 
+      error: 'Internal server error',
+      details: error.message
     });
   }
 });
@@ -205,6 +223,25 @@ router.get('/debug', (req, res) => {
     jwtSecretSet: !!JWT_SECRET && JWT_SECRET !== 'your-secret-key',
     storageFile: USERS_FILE,
     storageFileExists: fs.existsSync(USERS_FILE)
+  });
+});
+
+// Test endpoint for debugging
+router.post('/test', (req, res) => {
+  console.log('=== TEST ENDPOINT CALLED ===');
+  console.log('Request method:', req.method);
+  console.log('Request URL:', req.url);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+  console.log('Request body type:', typeof req.body);
+  console.log('Content-Type header:', req.headers['content-type']);
+  
+  res.json({
+    message: 'Test endpoint working',
+    receivedBody: req.body,
+    bodyType: typeof req.body,
+    headers: req.headers,
+    timestamp: new Date().toISOString()
   });
 });
 

@@ -60,18 +60,28 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
       } else {
         // Sign up through backend API
         console.log('Attempting sign up...');
+        console.log('Sign up data:', { email, password });
+        console.log('API Base URL:', apiBaseUrl);
+        console.log('Full signup URL:', `${apiBaseUrl}/api/auth/signup`);
+        
+        const requestBody = { email, password };
+        console.log('Request body to be sent:', requestBody);
+        console.log('JSON stringified body:', JSON.stringify(requestBody));
+        
         const response = await fetch(`${apiBaseUrl}/api/auth/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify(requestBody),
         });
 
         console.log('Sign up response status:', response.status);
+        console.log('Sign up response headers:', response.headers);
         
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: 'Sign up failed' }));
+          console.error('Sign up error response:', errorData);
           throw new Error(errorData.message || `Sign up failed: ${response.status}`);
         }
 

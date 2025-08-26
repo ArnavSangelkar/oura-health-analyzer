@@ -4,5 +4,11 @@
     "email": "test@example.com",
     "password": "$2a$10$odjGDvVN7cP/w1DuC2tzJunArR23qouMfR1F.Vfs22QOpSWWebT52",
     "createdAt": "2025-08-26T20:12:41.768Z"
+  },
+  {
+    "id": 2,
+    "email": "test3@example.com",
+    "password": "$2a$10$TSOfXe7DrLn6kTSs0.7Q5OECmt.eocLsYJEIDoIoa8xyNqToKlUIq",
+    "createdAt": "2025-08-26T20:17:45.126Z"
   }
 ]
