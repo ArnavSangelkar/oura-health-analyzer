@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+  }
+  
+  .metric-card {
+    @apply bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100;
+  }
+  
+  .health-score {
+    @apply text-3xl font-bold;
+  }
+  
+  .health-score.excellent { @apply text-green-600; }
+  .health-score.good { @apply text-blue-600; }
+  .health-score.fair { @apply text-yellow-600; }
+  .health-score.poor { @apply text-red-600; }
+}
+
