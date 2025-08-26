@@ -3,6 +3,7 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
 // File path for persistent user settings storage
 const SETTINGS_FILE = path.join(__dirname, '../data/user-settings.json');
@@ -131,29 +132,67 @@ router.post('/test-oura', authenticateToken, async (req, res) => {
       return res.status(400).json({ error: 'Oura token is required' });
     }
     
-    // Test the Oura API connection
-    const response = await fetch('https://api.ouraring.com/v2/usercollection/daily_sleep', {
+    console.log('🧪 Testing Oura API connection...');
+    console.log('Token length:', ouraToken.length);
+    console.log('Token preview:', ouraToken.substring(0, 10) + '...');
+    
+    // Test the Oura API connection using a simpler endpoint first
+    // Use the user info endpoint which is more reliable for testing
+    const response = await axios.get('https://api.ouraring.com/v2/userinfo', {
       headers: {
         'Authorization': `Bearer ${ouraToken}`,
         'Content-Type': 'application/json'
-      }
+      },
+      timeout: 15000 // 15 second timeout
     });
     
-    if (response.ok) {
-      res.json({
-        success: true,
-        message: 'Oura API connection successful'
-      });
-    } else {
-      const errorData = await response.json().catch(() => ({}));
+    console.log('✅ Oura API test successful!');
+    console.log('Response status:', response.status);
+    console.log('Response data keys:', Object.keys(response.data || {}));
+    
+    res.json({
+      success: true,
+      message: 'Oura API connection successful',
+      userInfo: response.data
+    });
+    
+  } catch (error) {
+    console.error('❌ Oura API test failed:');
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    
+    if (error.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error('Response status:', error.response.status);
+      console.error('Response headers:', error.response.headers);
+      console.error('Response data:', error.response.data);
+      
       res.status(400).json({
         error: 'Oura API connection failed',
-        details: errorData.error || `HTTP ${response.status}`
+        details: error.response.data?.error || error.response.data?.message || `HTTP ${error.response.status}`,
+        status: error.response.status,
+        statusText: error.response.statusText
+      });
+    } else if (error.request) {
+      // The request was made but no response was received
+      console.error('No response received from Oura API');
+      console.error('Request details:', error.request);
+      
+      res.status(500).json({
+        error: 'Oura API connection failed',
+        details: 'No response received from Oura API - check your internet connection and try again'
+      });
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error('Request setup error:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      res.status(500).json({
+        error: 'Oura API connection failed',
+        details: `Request setup error: ${error.message}`
       });
     }
-  } catch (error) {
-    console.error('Error testing Oura API:', error);
-    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
