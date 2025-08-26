@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Temporary hardcoded values until environment variables are properly configured
-const supabaseUrl = 'https://lgjjzpgnrjzbdcxh.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXV0K6w45bgMQLlYmPhQXVAw';
+// Use environment variables for production, fallback to hardcoded values for development
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://lgjjzpgnrjzbdcxbkcxh.supabase.co';
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXVdK6w45bgMQLlYmPhQXVAw';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
