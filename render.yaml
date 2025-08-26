@@ -1,22 +1,13 @@
 services:
   - type: web
     name: oura-health-analyzer
-    env: static
-    buildCommand: |
-      echo "Starting build process..."
-      cd frontend
-      echo "Installing dependencies..."
-      npm install
-      echo "Building React app..."
-      npm run build
-      echo "Build completed. Checking build directory:"
-      ls -la build/
-      echo "Copying build files to root..."
-      cp -r build/* ../
-      echo "Build process completed."
-    staticPublishPath: .
+    env: node
+    buildCommand: cd frontend && npm install && npm run build
+    startCommand: cd frontend && npx serve -s build -l $PORT
     envVars:
       - key: REACT_APP_SUPABASE_URL
         value: https://lgjjzpgnrjzbdcxh.supabase.co
       - key: REACT_APP_SUPABASE_ANON_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXV0K6w45bgMQLlYmPhQXVAw
+      - key: NODE_VERSION
+        value: "18.0.0"
