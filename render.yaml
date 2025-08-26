@@ -3,29 +3,13 @@ services:
     name: oura-health-analyzer
     env: static
     buildCommand: |
-      echo "=== BUILD PROCESS START ==="
-      echo "Current directory: $(pwd)"
-      echo "Listing root contents:"
-      ls -la
-      echo ""
-      echo "Building frontend:"
+      echo "=== STATIC SITE BUILD PROCESS ==="
+      echo "Building React frontend for Supabase MCP deployment..."
       cd frontend
-      echo "Frontend directory contents:"
-      ls -la
-      echo "Public directory contents:"
-      ls -la public/
-      echo "Installing frontend dependencies:"
       npm install
-      echo "Running React build:"
       npm run build
-      echo ""
-      echo "Build completed. Checking build directory:"
+      echo "Build completed successfully!"
       ls -la build/
-      echo ""
-      echo "Verifying index.html exists:"
-      ls -la build/index.html
-      echo ""
-      echo "=== BUILD PROCESS COMPLETED ==="
     staticPublishPath: ./frontend/build
     envVars:
       - key: REACT_APP_SUPABASE_URL
