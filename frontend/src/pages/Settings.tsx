@@ -126,6 +126,11 @@ const Settings: React.FC = () => {
         ? 'http://localhost:3000' 
         : window.location.origin;
       
+      console.log('🧪 Testing Oura API connection...');
+      console.log('API Base URL:', apiBaseUrl);
+      console.log('Token length:', token.length);
+      console.log('Oura token length:', ouraToken.trim().length);
+      
       // Test Oura API connection through our backend
       const response = await fetch(`${apiBaseUrl}/api/settings/test-oura`, {
         method: 'POST',
@@ -136,13 +141,23 @@ const Settings: React.FC = () => {
         body: JSON.stringify({ ouraToken: ouraToken.trim() })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (response.ok) {
+        const successData = await response.json();
+        console.log('Success response:', successData);
         setMessage({ type: 'success', text: 'Connection successful! Oura API is working correctly.' });
       } else {
         const errorData = await response.json();
-        setMessage({ type: 'error', text: `Connection failed: ${errorData.error || 'Unknown error'}` });
+        console.error('Error response:', errorData);
+        setMessage({ 
+          type: 'error', 
+          text: `Connection failed: ${errorData.error || errorData.details || 'Unknown error'}` 
+        });
       }
     } catch (error: any) {
+      console.error('Network error:', error);
       setMessage({ type: 'error', text: `Connection test failed: ${error.message}` });
     } finally {
       setLoading(false);

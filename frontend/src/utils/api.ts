@@ -23,7 +23,7 @@ export const ouraApi = {
   // Get latest health data
   async getLatestData() {
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE_URL}/oura-service/latest`, { headers })
+    const response = await fetch(`${API_BASE_URL}/api/oura/latest`, { headers })
     if (!response.ok) throw new Error('Failed to fetch latest data')
     return response.json()
   },
@@ -32,7 +32,7 @@ export const ouraApi = {
   async getHealthSummary(startDate: string, endDate: string) {
     const headers = await getAuthHeaders()
     const response = await fetch(
-      `${API_BASE_URL}/oura-service/summary?start_date=${startDate}&end_date=${endDate}`,
+      `${API_BASE_URL}/api/oura/summary?start_date=${startDate}&end_date=${endDate}`,
       { headers }
     )
     if (!response.ok) throw new Error('Failed to fetch health summary')
@@ -43,7 +43,7 @@ export const ouraApi = {
   async getSleepData(startDate: string, endDate: string) {
     const headers = await getAuthHeaders()
     const response = await fetch(
-      `${API_BASE_URL}/oura-service/sleep?start_date=${startDate}&end_date=${endDate}`,
+      `${API_BASE_URL}/api/oura/sleep?start_date=${startDate}&end_date=${endDate}`,
       { headers }
     )
     if (!response.ok) throw new Error('Failed to fetch sleep data')
@@ -54,7 +54,7 @@ export const ouraApi = {
   async getActivityData(startDate: string, endDate: string) {
     const headers = await getAuthHeaders()
     const response = await fetch(
-      `${API_BASE_URL}/oura-service/activity?start_date=${startDate}&end_date=${endDate}`,
+      `${API_BASE_URL}/api/oura/activity?start_date=${startDate}&end_date=${endDate}`,
       { headers }
     )
     if (!response.ok) throw new Error('Failed to fetch activity data')
@@ -65,7 +65,7 @@ export const ouraApi = {
   async getReadinessData(startDate: string, endDate: string) {
     const headers = await getAuthHeaders()
     const response = await fetch(
-      `${API_BASE_URL}/oura-service/readiness?start_date=${startDate}&end_date=${endDate}`,
+      `${API_BASE_URL}/api/oura/readiness?start_date=${startDate}&end_date=${endDate}`,
       { headers }
     )
     if (!response.ok) throw new Error('Failed to fetch readiness data')
@@ -84,7 +84,7 @@ export const aiApi = {
       body.customQuestion = customQuestion
     }
     
-    const response = await fetch(`${API_BASE_URL}/ai-insights`, {
+    const response = await fetch(`${API_BASE_URL}/api/ai/insights`, {
       method: 'POST',
       headers,
       body: JSON.stringify(body)
@@ -98,17 +98,17 @@ export const aiApi = {
 export const authApi = {
   async getProfile() {
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE_URL}/auth/profile`, { headers })
+    const response = await fetch(`${API_BASE_URL}/api/auth/profile`, { headers })
     if (!response.ok) throw new Error('Failed to fetch profile')
     return response.json()
   },
 
   async updateOuraToken(ouraToken: string) {
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE_URL}/auth/update-oura-token`, {
+    const response = await fetch(`${API_BASE_URL}/api/settings`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ oura_token: ouraToken })
+      body: JSON.stringify({ ouraToken })
     })
     if (!response.ok) throw new Error('Failed to update Oura token')
     return response.json()
