@@ -2,8 +2,19 @@ services:
   - type: web
     name: oura-health-analyzer
     env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/build
+    buildCommand: |
+      echo "Starting build process..."
+      cd frontend
+      echo "Installing dependencies..."
+      npm install
+      echo "Building React app..."
+      npm run build
+      echo "Build completed. Checking build directory:"
+      ls -la build/
+      echo "Copying build files to root..."
+      cp -r build/* ../
+      echo "Build process completed."
+    staticPublishPath: .
     envVars:
       - key: REACT_APP_SUPABASE_URL
         value: https://lgjjzpgnrjzbdcxh.supabase.co
