@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 const ouraRoutes = require('./routes/oura');
 const aiRoutes = require('./routes/ai');
 const healthRoutes = require('./routes/health');
+const authRoutes = require('./routes/auth');
 
 // Security middleware
 app.use(helmet({
@@ -54,6 +55,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/api/oura', ouraRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/auth', authRoutes);
 
 // Serve React app in production
 if (process.env.NODE_ENV === 'production') {

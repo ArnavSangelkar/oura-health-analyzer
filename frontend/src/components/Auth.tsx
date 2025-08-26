@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../utils/api';
+import { authApi } from '../utils/api';
 import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 interface AuthProps {
@@ -23,29 +23,43 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
 
     try {
       if (isLogin) {
-        // Sign in
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
+        // Sign in through backend API
+        const response = await fetch('/api/auth/signin', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
         });
 
-        if (error) throw error;
-        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Sign in failed');
+        }
+
+        const data = await response.json();
         setMessage('Successfully signed in!');
         setTimeout(() => onAuthSuccess(), 1000);
       } else {
-        // Sign up
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
+        // Sign up through backend API
+        const response = await fetch('/api/auth/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
         });
 
-        if (error) throw error;
-        
-        setMessage('Check your email for confirmation link!');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Sign up failed');
+        }
+
+        setMessage('Account created successfully! Please sign in.');
+        setIsLogin(true);
       }
     } catch (error: any) {
-      setError(error.message);
+      setError(error.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
