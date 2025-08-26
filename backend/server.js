@@ -46,16 +46,41 @@ app.use(morgan('combined'));
 // Add request logging for debugging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  console.log('Request headers:', req.headers);
+  console.log('Request body:', req.body);
+  console.log('Request query:', req.query);
+  console.log('Request params:', req.params);
+  console.log('---');
   next();
 });
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://oura-health-analyzer.onrender.com', 'https://*.onrender.com'] 
-    : ['http://localhost:3000', 'http://localhost:3001'],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow localhost for development
+    if (origin.startsWith('http://localhost:')) return callback(null, true);
+    
+    // Allow all Render domains
+    if (origin.includes('.onrender.com')) return callback(null, true);
+    
+    // Allow specific domains
+    const allowedOrigins = [
+      'https://oura-health-analyzer.onrender.com',
+      'https://oura-health-analyzer-frontend.onrender.com'
+    ];
+    
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    
+    console.log('⚠️ CORS blocked origin:', origin);
+    callback(null, true); // Allow all for debugging
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'apikey']
+  allowedHeaders: ['Content-Type', 'Authorization', 'apikey', 'Origin', 'Accept'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));

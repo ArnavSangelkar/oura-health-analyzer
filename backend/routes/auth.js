@@ -9,35 +9,54 @@ const path = require('path');
 const USERS_FILE = path.join(__dirname, '../data/users.json');
 
 // Ensure data directory exists
-const dataDir = path.dirname(USERS_FILE);
-if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+let dataDir;
+try {
+  dataDir = path.dirname(USERS_FILE);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+    console.log('✅ Data directory created:', dataDir);
+  }
+} catch (error) {
+  console.error('❌ Error creating data directory:', error);
+  dataDir = null;
 }
 
 // Load users from file or start with empty array
 let users = [];
 try {
-  if (fs.existsSync(USERS_FILE)) {
+  if (dataDir && fs.existsSync(USERS_FILE)) {
     const data = fs.readFileSync(USERS_FILE, 'utf8');
     users = JSON.parse(data);
-    console.log(`Loaded ${users.length} users from storage`);
+    console.log(`✅ Loaded ${users.length} users from storage:`, USERS_FILE);
+  } else {
+    console.log('ℹ️ No existing user storage found, starting with empty array');
   }
 } catch (error) {
-  console.error('Error loading users:', error);
+  console.error('❌ Error loading users:', error);
   users = [];
 }
 
-// Save users to file
+// Save users to file with fallback
 const saveUsers = () => {
   try {
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+    if (dataDir) {
+      fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+      console.log('✅ Users saved to file');
+    } else {
+      console.log('⚠️ Data directory not available, users stored in memory only');
+    }
   } catch (error) {
-    console.error('Error saving users:', error);
+    console.error('❌ Error saving users:', error);
+    console.log('⚠️ Users will be stored in memory only');
   }
 };
 
-// JWT secret (use environment variable in production)
+// JWT secret with validation
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+if (JWT_SECRET === 'your-secret-key' || JWT_SECRET === 'your-super-secure-jwt-secret-key-here-change-this-in-production') {
+  console.warn('⚠️ WARNING: Using default JWT_SECRET. This is not secure for production!');
+  console.warn('⚠️ Please set JWT_SECRET environment variable in Render dashboard');
+}
 
 // Sign up endpoint
 router.post('/signup', async (req, res) => {
@@ -47,12 +66,26 @@ router.post('/signup', async (req, res) => {
     console.log('Request body:', req.body);
     console.log('Request body type:', typeof req.body);
     console.log('Request body keys:', Object.keys(req.body || {}));
+    console.log('Content-Type header:', req.headers['content-type']);
+    console.log('User-Agent:', req.headers['user-agent']);
+    console.log('Origin:', req.headers['origin']);
+    console.log('Referer:', req.headers['referer']);
+    
+    // Check if request body is empty or malformed
+    if (!req.body || typeof req.body !== 'object') {
+      console.log('❌ Signup failed: Invalid request body');
+      return res.status(400).json({ 
+        error: 'Invalid request body',
+        received: req.body,
+        bodyType: typeof req.body
+      });
+    }
     
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
-      console.log('Signup failed: Missing email or password');
+      console.log('❌ Signup failed: Missing email or password');
       console.log('Email value:', email);
       console.log('Password value:', password);
       console.log('Email type:', typeof email);
@@ -65,7 +98,7 @@ router.post('/signup', async (req, res) => {
     }
 
     if (password.length < 6) {
-      console.log('Signup failed: Password too short');
+      console.log('❌ Signup failed: Password too short');
       console.log('Password length:', password.length);
       return res.status(400).json({ 
         error: 'Password must be at least 6 characters long',
@@ -76,13 +109,13 @@ router.post('/signup', async (req, res) => {
     // Check if user already exists
     const existingUser = users.find(user => user.email === email);
     if (existingUser) {
-      console.log('Signup failed: User already exists:', email);
+      console.log('❌ Signup failed: User already exists:', email);
       return res.status(400).json({ 
         error: 'User with this email already exists' 
       });
     }
 
-    console.log('Validation passed, creating user...');
+    console.log('✅ Validation passed, creating user...');
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -98,7 +131,7 @@ router.post('/signup', async (req, res) => {
     users.push(user);
     saveUsers(); // Save to file
 
-    console.log('User created successfully:', { id: user.id, email: user.email });
+    console.log('✅ User created successfully:', { id: user.id, email: user.email });
 
     // Create JWT token
     const token = jwt.sign(
@@ -115,7 +148,7 @@ router.post('/signup', async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('❌ Signup error:', error);
     console.error('Error stack:', error.stack);
     res.status(500).json({ 
       error: 'Internal server error',
@@ -242,6 +275,24 @@ router.post('/test', (req, res) => {
     bodyType: typeof req.body,
     headers: req.headers,
     timestamp: new Date().toISOString()
+  });
+});
+
+// Simple ping endpoint
+router.get('/ping', (req, res) => {
+  console.log('=== PING ENDPOINT CALLED ===');
+  console.log('Request headers:', req.headers);
+  console.log('Origin:', req.headers.origin);
+  
+  res.json({
+    message: 'Auth service is running',
+    timestamp: new Date().toISOString(),
+    headers: req.headers,
+    cors: {
+      origin: req.headers.origin,
+      method: req.method,
+      userAgent: req.headers['user-agent']
+    }
   });
 });
 
