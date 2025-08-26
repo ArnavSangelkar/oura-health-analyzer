@@ -13,7 +13,13 @@ services:
       echo ""
       echo "Building frontend:"
       cd frontend
+      echo "Frontend directory contents:"
+      ls -la
+      echo "Public directory contents:"
+      ls -la public/
+      echo "Installing frontend dependencies:"
       npm install
+      echo "Running React build:"
       npm run build
       echo ""
       echo "Build completed. Checking build directory:"
@@ -22,19 +28,11 @@ services:
       echo "Verifying index.html exists:"
       ls -la build/index.html
       echo ""
-      echo "Copying build to root for easier access:"
-      cd ..
-      cp -r frontend/build ./build
-      echo "Root build directory contents:"
-      ls -la build/
-      echo ""
       echo "=== BUILD PROCESS COMPLETED ==="
     startCommand: |
       echo "Starting server from: $(pwd)"
       echo "Checking if frontend/build exists:"
       ls -la frontend/build/
-      echo "Checking if root build exists:"
-      ls -la build/ 2>/dev/null || echo "Root build directory not found"
       echo "Starting Node.js server..."
       node backend/server.js
     envVars:
