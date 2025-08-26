@@ -2,9 +2,39 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+const path = require('path');
 
-// In-memory user storage (replace with database in production)
-const users = [];
+// File path for persistent user storage
+const USERS_FILE = path.join(__dirname, '../data/users.json');
+
+// Ensure data directory exists
+const dataDir = path.dirname(USERS_FILE);
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Load users from file or start with empty array
+let users = [];
+try {
+  if (fs.existsSync(USERS_FILE)) {
+    const data = fs.readFileSync(USERS_FILE, 'utf8');
+    users = JSON.parse(data);
+    console.log(`Loaded ${users.length} users from storage`);
+  }
+} catch (error) {
+  console.error('Error loading users:', error);
+  users = [];
+}
+
+// Save users to file
+const saveUsers = () => {
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 2));
+  } catch (error) {
+    console.error('Error saving users:', error);
+  }
+};
 
 // JWT secret (use environment variable in production)
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -12,16 +42,19 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 // Sign up endpoint
 router.post('/signup', async (req, res) => {
   try {
+    console.log('Signup request body:', req.body);
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
+      console.log('Signup failed: Missing email or password');
       return res.status(400).json({ 
         error: 'Email and password are required' 
       });
     }
 
     if (password.length < 6) {
+      console.log('Signup failed: Password too short');
       return res.status(400).json({ 
         error: 'Password must be at least 6 characters long' 
       });
@@ -30,6 +63,7 @@ router.post('/signup', async (req, res) => {
     // Check if user already exists
     const existingUser = users.find(user => user.email === email);
     if (existingUser) {
+      console.log('Signup failed: User already exists:', email);
       return res.status(400).json({ 
         error: 'User with this email already exists' 
       });
@@ -47,6 +81,9 @@ router.post('/signup', async (req, res) => {
     };
 
     users.push(user);
+    saveUsers(); // Save to file
+
+    console.log('User created successfully:', { id: user.id, email: user.email });
 
     // Create JWT token
     const token = jwt.sign(
@@ -72,10 +109,12 @@ router.post('/signup', async (req, res) => {
 // Sign in endpoint
 router.post('/signin', async (req, res) => {
   try {
+    console.log('Signin request body:', req.body);
     const { email, password } = req.body;
 
     // Validate input
     if (!email || !password) {
+      console.log('Signin failed: Missing email or password');
       return res.status(400).json({ 
         error: 'Email and password are required' 
       });
@@ -84,6 +123,7 @@ router.post('/signin', async (req, res) => {
     // Find user
     const user = users.find(user => user.email === email);
     if (!user) {
+      console.log('Signin failed: User not found:', email);
       return res.status(401).json({ 
         error: 'Invalid email or password' 
       });
@@ -92,10 +132,13 @@ router.post('/signin', async (req, res) => {
     // Check password
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
+      console.log('Signin failed: Invalid password for user:', email);
       return res.status(401).json({ 
         error: 'Invalid email or password' 
       });
     }
+
+    console.log('User signed in successfully:', { id: user.id, email: user.email });
 
     // Create JWT token
     const token = jwt.sign(
@@ -151,6 +194,18 @@ router.get('/profile', (req, res) => {
       error: 'Invalid token' 
     });
   }
+});
+
+// Debug endpoint (remove in production)
+router.get('/debug', (req, res) => {
+  res.json({
+    message: 'Auth debug info',
+    totalUsers: users.length,
+    users: users.map(u => ({ id: u.id, email: u.email, createdAt: u.createdAt })),
+    jwtSecretSet: !!JWT_SECRET && JWT_SECRET !== 'your-secret-key',
+    storageFile: USERS_FILE,
+    storageFileExists: fs.existsSync(USERS_FILE)
+  });
 });
 
 module.exports = router;
