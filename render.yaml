@@ -1,10 +1,48 @@
 services:
-  - type: static
+  - type: web
     name: oura-health-analyzer
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/build
+    env: node
+    buildCommand: |
+      echo "=== BUILD PROCESS START ==="
+      echo "Current directory: $(pwd)"
+      echo "Listing root contents:"
+      ls -la
+      echo ""
+      echo "Installing root dependencies:"
+      npm install
+      echo ""
+      echo "Building frontend:"
+      cd frontend
+      npm install
+      npm run build
+      echo ""
+      echo "Build completed. Checking build directory:"
+      ls -la build/
+      echo ""
+      echo "Verifying index.html exists:"
+      ls -la build/index.html
+      echo ""
+      echo "Copying build to root for easier access:"
+      cd ..
+      cp -r frontend/build ./build
+      echo "Root build directory contents:"
+      ls -la build/
+      echo ""
+      echo "=== BUILD PROCESS COMPLETED ==="
+    startCommand: |
+      echo "Starting server from: $(pwd)"
+      echo "Checking if frontend/build exists:"
+      ls -la frontend/build/
+      echo "Checking if root build exists:"
+      ls -la build/ 2>/dev/null || echo "Root build directory not found"
+      echo "Starting Node.js server..."
+      node backend/server.js
     envVars:
       - key: REACT_APP_SUPABASE_URL
         value: https://lgjjzpgnrjzbdcxh.supabase.co
       - key: REACT_APP_SUPABASE_ANON_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXV0K6w45bgMQLlYmPhQXVAw
+      - key: NODE_VERSION
+        value: "18.0.0"
+      - key: NODE_ENV
+        value: "production"
