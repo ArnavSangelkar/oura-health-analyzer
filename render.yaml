@@ -2,7 +2,17 @@ services:
   - type: web
     name: oura-health-analyzer
     env: node
-    buildCommand: cd frontend && npm install && npm run build
+    buildCommand: |
+      echo "Current directory: $(pwd)"
+      echo "Listing contents:"
+      ls -la
+      echo "Installing frontend dependencies..."
+      cd frontend && npm install
+      echo "Building React app..."
+      npm run build
+      echo "Build completed. Checking build directory:"
+      ls -la build/
+      echo "Build process completed successfully."
     startCommand: cd frontend && npx serve -s build -l $PORT
     envVars:
       - key: REACT_APP_SUPABASE_URL
