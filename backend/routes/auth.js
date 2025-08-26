@@ -97,6 +97,15 @@ router.post('/signup', async (req, res) => {
       });
     }
 
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      console.log('❌ Signup failed: Invalid email format:', email);
+      return res.status(400).json({ 
+        error: 'Please enter a valid email address'
+      });
+    }
+
     if (password.length < 6) {
       console.log('❌ Signup failed: Password too short');
       console.log('Password length:', password.length);

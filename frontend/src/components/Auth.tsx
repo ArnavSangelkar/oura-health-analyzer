@@ -3,7 +3,7 @@ import { authApi } from '../utils/api';
 import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 
 interface AuthProps {
-  onAuthSuccess: () => void;
+  onAuthSuccess: (user: any, token: string) => void;
 }
 
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
@@ -56,7 +56,8 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         const data = await response.json();
         console.log('Sign in successful:', data);
         setMessage('Successfully signed in!');
-        setTimeout(() => onAuthSuccess(), 1000);
+        // Call onAuthSuccess with user data and token
+        onAuthSuccess(data.user, data.token);
       } else {
         // Sign up through backend API
         console.log('Attempting sign up...');
@@ -82,7 +83,10 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ message: 'Sign up failed' }));
           console.error('Sign up error response:', errorData);
-          throw new Error(errorData.message || `Sign up failed: ${response.status}`);
+          
+          // Show specific error message from backend
+          const errorMessage = errorData.error || errorData.message || `Sign up failed: ${response.status}`;
+          throw new Error(errorMessage);
         }
 
         const data = await response.json();
@@ -165,6 +169,11 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
+              {!isLogin && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Password must be at least 6 characters long
+                </p>
+              )}
             </div>
 
             {error && (

@@ -1,32 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Activity, Brain, Database, Settings, Home, User, LogOut } from 'lucide-react';
-import { supabase } from '../utils/api';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  onLogout: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ onLogout }) => {
   const location = useLocation();
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    // Get current user
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-    };
-
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-  };
 
   const navItems = [
     { path: '/', label: 'Dashboard', icon: Home },
@@ -69,26 +50,13 @@ const Navbar: React.FC = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            {user ? (
-              <>
-                <span className="text-sm text-gray-700">Welcome, {user.email}</span>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
-                >
-                  <LogOut className="h-4 w-4" />
-                  <span>Sign Out</span>
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/auth"
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200"
-              >
-                <User className="h-4 w-4" />
-                <span>Sign In</span>
-              </Link>
-            )}
+            <button
+              onClick={onLogout}
+              className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </button>
           </div>
           
           <div className="md:hidden">

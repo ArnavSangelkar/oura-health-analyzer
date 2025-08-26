@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { supabase } from './utils/api';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import HealthData from './pages/HealthData';
@@ -13,25 +12,54 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get current user
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    // Check if user is logged in by looking for JWT token in localStorage
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      // Verify token with backend
+      verifyToken(token);
+    } else {
       setLoading(false);
-    };
-
-    getUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
+    }
   }, []);
 
-  const handleAuthSuccess = () => {
-    // This will trigger the useEffect to update the user state
+  const verifyToken = async (token: string) => {
+    try {
+      const apiBaseUrl = process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : window.location.origin;
+      
+      const response = await fetch(`${apiBaseUrl}/api/auth/profile`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user);
+        localStorage.setItem('authToken', token);
+      } else {
+        // Token is invalid, remove it
+        localStorage.removeItem('authToken');
+        setUser(null);
+      }
+    } catch (error) {
+      console.error('Token verification failed:', error);
+      localStorage.removeItem('authToken');
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAuthSuccess = (userData: any, token: string) => {
+    setUser(userData);
+    localStorage.setItem('authToken', token);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('authToken');
   };
 
   if (loading) {
@@ -45,7 +73,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
-        {user && <Navbar />}
+        {user && <Navbar onLogout={handleLogout} />}
         <main className={user ? "container mx-auto px-4 py-8" : ""}>
           <Routes>
             <Route 
