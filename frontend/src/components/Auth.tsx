@@ -15,6 +15,16 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  // Get the current domain to determine API base URL
+  const getApiBaseUrl = () => {
+    if (process.env.NODE_ENV === 'production') {
+      // In production, use the current domain
+      return window.location.origin;
+    }
+    // In development, use localhost
+    return 'http://localhost:3000';
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -22,9 +32,13 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
     setMessage(null);
 
     try {
+      const apiBaseUrl = getApiBaseUrl();
+      console.log('API Base URL:', apiBaseUrl);
+
       if (isLogin) {
         // Sign in through backend API
-        const response = await fetch('/api/auth/signin', {
+        console.log('Attempting sign in...');
+        const response = await fetch(`${apiBaseUrl}/api/auth/signin`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -32,17 +46,21 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
           body: JSON.stringify({ email, password }),
         });
 
+        console.log('Sign in response status:', response.status);
+        
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Sign in failed');
+          const errorData = await response.json().catch(() => ({ message: 'Sign in failed' }));
+          throw new Error(errorData.message || `Sign in failed: ${response.status}`);
         }
 
         const data = await response.json();
+        console.log('Sign in successful:', data);
         setMessage('Successfully signed in!');
         setTimeout(() => onAuthSuccess(), 1000);
       } else {
         // Sign up through backend API
-        const response = await fetch('/api/auth/signup', {
+        console.log('Attempting sign up...');
+        const response = await fetch(`${apiBaseUrl}/api/auth/signup`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -50,15 +68,20 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
           body: JSON.stringify({ email, password }),
         });
 
+        console.log('Sign up response status:', response.status);
+        
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Sign up failed');
+          const errorData = await response.json().catch(() => ({ message: 'Sign up failed' }));
+          throw new Error(errorData.message || `Sign up failed: ${response.status}`);
         }
 
+        const data = await response.json();
+        console.log('Sign up successful:', data);
         setMessage('Account created successfully! Please sign in.');
         setIsLogin(true);
       }
     } catch (error: any) {
+      console.error('Authentication error:', error);
       setError(error.message || 'Authentication failed');
     } finally {
       setLoading(false);

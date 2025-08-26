@@ -42,11 +42,20 @@ app.use('/api/', limiter);
 // Middleware
 app.use(compression());
 app.use(morgan('combined'));
+
+// Add request logging for debugging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
+
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://oura-health-analyzer.onrender.com'] 
+    ? ['https://oura-health-analyzer.onrender.com', 'https://*.onrender.com'] 
     : ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'apikey']
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
