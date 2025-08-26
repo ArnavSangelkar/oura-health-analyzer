@@ -1,15 +1,12 @@
 services:
-  - type: web
+  - type: static
     name: oura-health-analyzer
-    env: node
+    env: static
     buildCommand: |
       echo "=== BUILD PROCESS START ==="
       echo "Current directory: $(pwd)"
       echo "Listing root contents:"
       ls -la
-      echo ""
-      echo "Installing root dependencies:"
-      npm install
       echo ""
       echo "Building frontend:"
       cd frontend
@@ -29,20 +26,9 @@ services:
       ls -la build/index.html
       echo ""
       echo "=== BUILD PROCESS COMPLETED ==="
-    startCommand: |
-      echo "Starting server from: $(pwd)"
-      echo "Checking if frontend/build exists:"
-      ls -la frontend/build/
-      echo "Starting Node.js server..."
-      node backend/server.js
+    staticPublishPath: ./frontend/build
     envVars:
       - key: REACT_APP_SUPABASE_URL
         value: https://lgjjzpgnrjzbdcxh.supabase.co
       - key: REACT_APP_SUPABASE_ANON_KEY
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxnamp6cGducmp6YmRjeGJrY3hoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYxNzIzMzksImV4cCI6MjA3MTc0ODMzOX0.FOnIUD0qdWNicrtxv82qXV0K6w45bgMQLlYmPhQXVAw
-      - key: NODE_VERSION
-        value: "18.0.0"
-      - key: NODE_ENV
-        value: "production"
-      - key: JWT_SECRET
-        value: "ad3256dd3bd2e41bf6d109181f907001"

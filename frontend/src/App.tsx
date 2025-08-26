@@ -35,11 +35,6 @@ function App() {
     // No need to do anything here as Supabase handles the session
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -51,7 +46,7 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
-        {user && <Navbar onLogout={handleLogout} />}
+        {user && <Navbar />}
         <main className={user ? "container mx-auto px-4 py-8" : ""}>
           <Routes>
             <Route 
