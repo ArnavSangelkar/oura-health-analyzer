@@ -3,16 +3,28 @@ services:
     name: oura-health-analyzer
     env: node
     buildCommand: |
+      echo "=== BUILD PROCESS START ==="
       echo "Current directory: $(pwd)"
-      echo "Listing contents:"
+      echo "Listing root contents:"
       ls -la
-      echo "Installing frontend dependencies..."
-      cd frontend && npm install
-      echo "Building React app..."
+      echo ""
+      echo "Checking frontend directory:"
+      ls -la frontend/
+      echo ""
+      echo "Removing old build if exists:"
+      rm -rf frontend/build
+      echo ""
+      echo "Installing frontend dependencies:"
+      cd frontend
+      npm install
+      echo ""
+      echo "Building React app:"
       npm run build
+      echo ""
       echo "Build completed. Checking build directory:"
       ls -la build/
-      echo "Build process completed successfully."
+      echo ""
+      echo "=== BUILD PROCESS COMPLETED ==="
     startCommand: cd frontend && npx serve -s build -l $PORT
     envVars:
       - key: REACT_APP_SUPABASE_URL
