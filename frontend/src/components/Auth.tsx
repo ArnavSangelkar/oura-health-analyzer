@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { authApi } from '../utils/api';
-import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { User, Mail, Eye, EyeOff } from 'lucide-react';
+import { supabase } from '../utils/api';
 
 interface AuthProps {
-  onAuthSuccess: (user: any, token: string) => void;
+  onAuthSuccess: () => void;
 }
 
 const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
@@ -12,86 +12,39 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-
-  // Get the current domain to determine API base URL
-  const getApiBaseUrl = () => {
-    if (process.env.NODE_ENV === 'production') {
-      // In production, use the current domain
-      return window.location.origin;
-    }
-    // In development, use localhost
-    return 'http://localhost:3000';
-  };
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setMessage(null);
+    setError('');
+    setMessage('');
 
     try {
-      const apiBaseUrl = getApiBaseUrl();
-      console.log('API Base URL:', apiBaseUrl);
-
       if (isLogin) {
-        // Sign in through backend API
-        console.log('Attempting sign in...');
-        const response = await fetch(`${apiBaseUrl}/api/auth/signin`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
+        // Sign in with Supabase
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
         });
 
-        console.log('Sign in response status:', response.status);
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Sign in failed' }));
-          throw new Error(errorData.message || `Sign in failed: ${response.status}`);
-        }
+        if (error) throw error;
 
-        const data = await response.json();
         console.log('Sign in successful:', data);
         setMessage('Successfully signed in!');
-        // Call onAuthSuccess with user data and token
-        onAuthSuccess(data.user, data.token);
+        onAuthSuccess();
       } else {
-        // Sign up through backend API
-        console.log('Attempting sign up...');
-        console.log('Sign up data:', { email, password });
-        console.log('API Base URL:', apiBaseUrl);
-        console.log('Full signup URL:', `${apiBaseUrl}/api/auth/signup`);
-        
-        const requestBody = { email, password };
-        console.log('Request body to be sent:', requestBody);
-        console.log('JSON stringified body:', JSON.stringify(requestBody));
-        
-        const response = await fetch(`${apiBaseUrl}/api/auth/signup`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
+        // Sign up with Supabase
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
         });
 
-        console.log('Sign up response status:', response.status);
-        console.log('Sign up response headers:', response.headers);
-        
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: 'Sign up failed' }));
-          console.error('Sign up error response:', errorData);
-          
-          // Show specific error message from backend
-          const errorMessage = errorData.error || errorData.message || `Sign up failed: ${response.status}`;
-          throw new Error(errorMessage);
-        }
+        if (error) throw error;
 
-        const data = await response.json();
         console.log('Sign up successful:', data);
-        setMessage('Account created successfully! Please sign in.');
+        setMessage('Account created successfully! Please check your email to verify your account.');
         setIsLogin(true);
       }
     } catch (error: any) {
@@ -192,14 +145,13 @@ const Auth: React.FC<AuthProps> = ({ onAuthSuccess }) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                 ) : (
-                  <Lock className="h-4 w-4 mr-2" />
+                  isLogin ? 'Sign in' : 'Sign up'
                 )}
-                {loading ? 'Processing...' : (isLogin ? 'Sign in' : 'Sign up')}
               </button>
             </div>
           </form>

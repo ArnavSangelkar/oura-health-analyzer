@@ -21,32 +21,16 @@ const Settings: React.FC = () => {
 
   const loadUserSettings = async () => {
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        console.error('No auth token found');
-        return;
-      }
-
-      const apiBaseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
-      
-      const response = await fetch(`${apiBaseUrl}/api/settings`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.settings) {
-          setOuraToken(data.settings.ouraToken || '');
-          setOpenaiKey(data.settings.openaiKey || '');
-          setSettings(prev => ({
-            ...prev,
-            ...data.settings
-          }));
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('oura_token')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.oura_token) {
+          setOuraToken(profile.oura_token);
         }
       }
     } catch (error) {
@@ -68,36 +52,21 @@ const Settings: React.FC = () => {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('User not authenticated');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
 
-      const apiBaseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
-      
-      // Save settings to our backend
-      const response = await fetch(`${apiBaseUrl}/api/settings`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          ouraToken: ouraToken.trim(),
-          openaiKey: openaiKey.trim(),
-          notifications: settings.notifications,
-          autoRefresh: settings.autoRefresh,
-          dataRetention: settings.dataRetention,
-          theme: settings.theme
-        })
-      });
+      // Update the profile with the Oura token
+      const { error } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          email: user.email,
+          oura_token: ouraToken.trim(),
+          updated_at: new Date().toISOString()
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to save settings');
-      }
+      if (error) throw error;
 
-      const data = await response.json();
       setMessage({ type: 'success', text: 'Settings saved successfully! Your Oura token is now configured.' });
       
       // Clear the message after 5 seconds
@@ -119,45 +88,22 @@ const Settings: React.FC = () => {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('User not authenticated');
-
-      const apiBaseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
-      
-      console.log('🧪 Testing Oura API connection...');
-      console.log('API Base URL:', apiBaseUrl);
-      console.log('Token length:', token.length);
-      console.log('Oura token length:', ouraToken.trim().length);
-      
-      // Test Oura API connection through our backend
-      const response = await fetch(`${apiBaseUrl}/api/settings/test-oura`, {
-        method: 'POST',
+      // Test the Oura API connection by calling our Edge Function
+      const response = await fetch(`${process.env.REACT_APP_SUPABASE_URL}/functions/v1/oura-service/latest`, {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          'apikey': process.env.REACT_APP_SUPABASE_ANON_KEY || '',
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ ouraToken: ouraToken.trim() })
+        }
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
-
       if (response.ok) {
-        const successData = await response.json();
-        console.log('Success response:', successData);
         setMessage({ type: 'success', text: 'Connection successful! Oura API is working correctly.' });
       } else {
         const errorData = await response.json();
-        console.error('Error response:', errorData);
-        setMessage({ 
-          type: 'error', 
-          text: `Connection failed: ${errorData.error || errorData.details || 'Unknown error'}` 
-        });
+        setMessage({ type: 'error', text: `Connection failed: ${errorData.error || 'Unknown error'}` });
       }
     } catch (error: any) {
-      console.error('Network error:', error);
       setMessage({ type: 'error', text: `Connection test failed: ${error.message}` });
     } finally {
       setLoading(false);

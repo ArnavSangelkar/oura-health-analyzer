@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './utils/api';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
@@ -13,57 +13,31 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in by looking for JWT token in localStorage
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      // Verify token with backend
-      verifyToken(token);
-    } else {
+    // Get current user from Supabase
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
       setLoading(false);
-    }
+    };
+
+    getUser();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const verifyToken = async (token: string) => {
-    try {
-      const apiBaseUrl = process.env.NODE_ENV === 'development' 
-        ? 'http://localhost:3000' 
-        : window.location.origin;
-      
-      const response = await fetch(`${apiBaseUrl}/api/auth/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        localStorage.setItem('authToken', token);
-      } else {
-        // Token is invalid, remove it
-        localStorage.removeItem('authToken');
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Token verification failed:', error);
-      localStorage.removeItem('authToken');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAuthSuccess = async (userData: any, token: string) => {
-    setUser(userData);
-    localStorage.setItem('authToken', token);
+  const handleAuthSuccess = () => {
+    // This will trigger the useEffect to update the user state
+    // No need to do anything here as Supabase handles the session
   };
 
   const handleLogout = async () => {
-    // Sign out from Supabase (for any remaining Supabase features)
     await supabase.auth.signOut();
-    
     setUser(null);
-    localStorage.removeItem('authToken');
   };
 
   if (loading) {
