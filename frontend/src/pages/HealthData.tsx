@@ -19,15 +19,7 @@ const HealthData: React.FC = () => {
       setHealthData(data);
     } catch (err: any) {
       console.error('Error loading health data:', err);
-      
-      // Check if the error is related to missing Oura API key
-      if (err.message?.includes('Failed to fetch health summary') || 
-          err.message?.includes('401') || 
-          err.message?.includes('Unauthorized')) {
-        setError('Oura API key not configured. Please go to Settings to add or update your Oura Ring API key.');
-      } else {
-        setError('Failed to load health data. Please try again.');
-      }
+      setError('Failed to load health data. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -51,7 +43,7 @@ const HealthData: React.FC = () => {
     const end = new Date(dateRange.endDate);
     const diffTime = Math.abs(end.getTime() - start.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays + 1; // +1 to include both start and end dates
+    return diffDays; // Removed +1 to fix the off-by-one error
   };
 
   const checkOuraToken = async () => {
@@ -152,25 +144,9 @@ const HealthData: React.FC = () => {
       {error ? (
         <div className="text-center py-12">
           <div className="text-red-600 mb-4">{error}</div>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            {error.includes('Oura API key not configured') ? (
-              <>
-                <button 
-                  onClick={() => window.location.href = '/settings'} 
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Go to Settings
-                </button>
-                <button onClick={loadHealthData} className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                  Try Again
-                </button>
-              </>
-            ) : (
-              <button onClick={loadHealthData} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-                Try Again
-              </button>
-            )}
-          </div>
+          <button onClick={loadHealthData} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
         </div>
       ) : (
         <>
