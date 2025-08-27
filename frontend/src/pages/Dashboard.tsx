@@ -38,6 +38,8 @@ const Dashboard: React.FC = () => {
     try {
       setLoading(true);
       const data = await ouraApi.getLatestData();
+      console.log('Dashboard received data:', data);
+      console.log('Sleep data:', data?.sleep);
       setLatestData(data);
     } catch (err) {
       setError('Failed to load health data');
@@ -148,17 +150,31 @@ const Dashboard: React.FC = () => {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">Total Sleep</span>
-                <span className="font-medium">{(latestData.sleep.total_sleep_duration / 3600).toFixed(1)}h</span>
+                <span className="font-medium">
+                  {latestData.sleep.total_sleep_duration ? 
+                    (latestData.sleep.total_sleep_duration / 3600).toFixed(1) + 'h' : 
+                    'N/A'
+                  }
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Deep Sleep</span>
-                <span className="font-medium">{(latestData.sleep.deep_sleep_duration / 3600).toFixed(1)}h</span>
+                <span className="font-medium">
+                  {latestData.sleep.deep_sleep_duration ? 
+                    (latestData.sleep.deep_sleep_duration / 3600).toFixed(1) + 'h' : 
+                    'N/A'
+                  }
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">REM Sleep</span>
-                <span className="font-medium">{(latestData.sleep.rem_sleep_duration / 3600).toFixed(1)}h</span>
+                <span className="font-medium">
+                  {latestData.sleep.rem_sleep_duration ? 
+                    (latestData.sleep.rem_sleep_duration / 3600).toFixed(1) + 'h' : 
+                    'N/A'
+                  }
+                </span>
               </div>
-
             </div>
           ) : (
             <p className="text-gray-500">No sleep data available</p>
