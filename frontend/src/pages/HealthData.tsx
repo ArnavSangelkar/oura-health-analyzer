@@ -141,34 +141,34 @@ const HealthData: React.FC = () => {
       )}
 
       {/* Summary Stats */}
-          {healthData?.summary && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Sleep Score</h3>
-                <p className="text-3xl font-bold text-blue-600">
-                  {healthData.summary.averageSleepScore.toFixed(1)}
-                </p>
-                <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
-              </div>
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Activity Score</h3>
-                <p className="text-3xl font-bold text-green-600">
-                  {healthData.summary.averageActivityScore.toFixed(1)}
-                </p>
-                <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
-              </div>
-              <div className="card">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Readiness Score</h3>
-                <p className="text-3xl font-bold text-yellow-600">
-                  {healthData.summary.averageReadinessScore.toFixed(1)}
-                </p>
-                <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
-              </div>
-            </div>
-          )}
+      {healthData?.summary && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Sleep Score</h3>
+            <p className="text-3xl font-bold text-blue-600">
+              {healthData.summary.averageSleepScore.toFixed(1)}
+            </p>
+            <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
+          </div>
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Activity Score</h3>
+            <p className="text-3xl font-bold text-green-600">
+              {healthData.summary.averageActivityScore.toFixed(1)}
+            </p>
+            <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
+          </div>
+          <div className="card">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Average Readiness Score</h3>
+            <p className="text-3xl font-bold text-yellow-600">
+              {healthData.summary.averageReadinessScore.toFixed(1)}
+            </p>
+            <p className="text-sm text-gray-500">Over {healthData.summary.totalDays || calculateDays()} days</p>
+          </div>
+        </div>
+      )}
 
-          {/* Data Tables */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Data Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Sleep Data */}
             <div className="card">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Sleep Data</h2>
@@ -230,8 +230,6 @@ const HealthData: React.FC = () => {
                 <p className="text-gray-500">No activity data available</p>
               )}
             </div>
-          </div>
-        </div>
       </div>
 
       {error ? (
