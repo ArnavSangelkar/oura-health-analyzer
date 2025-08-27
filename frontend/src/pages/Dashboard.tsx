@@ -53,7 +53,6 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     if (hasOuraToken === false) {
-      setError('Oura API key not configured. Please go to Settings to add or update your Oura Ring API key.');
       setLoading(false);
     } else if (hasOuraToken === true) {
       loadData();

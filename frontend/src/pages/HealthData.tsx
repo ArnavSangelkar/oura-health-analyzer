@@ -31,7 +31,6 @@ const HealthData: React.FC = () => {
 
   useEffect(() => {
     if (hasOuraToken === false) {
-      setError('Oura API key not configured. Please go to Settings to add or update your Oura Ring API key.');
       setLoading(false);
     } else if (hasOuraToken === true) {
       loadHealthData();
@@ -141,16 +140,7 @@ const HealthData: React.FC = () => {
         </div>
       )}
 
-      {error ? (
-        <div className="text-center py-12">
-          <div className="text-red-600 mb-4">{error}</div>
-          <button onClick={loadHealthData} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Try Again
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Summary Stats */}
+      {/* Summary Stats */}
           {healthData?.summary && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="card">
@@ -241,8 +231,18 @@ const HealthData: React.FC = () => {
               )}
             </div>
           </div>
-        </>
-      )}
+        </div>
+      </div>
+
+      {error ? (
+        <div className="text-center py-12">
+          <div className="text-red-600 mb-4">{error}</div>
+          <button onClick={loadHealthData} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      ) : null}
+
     </div>
   );
 };
