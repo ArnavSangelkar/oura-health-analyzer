@@ -130,11 +130,24 @@ async function getLatestData(ouraToken: string, startDate?: string | null, endDa
     getDailySleepScores(ouraToken, yesterday, today)
   ])
 
+  // Combine sleep data with scores from the correct endpoint
+  let processedSleep = null
+  if (sleep.data && sleep.data.length > 0) {
+    const sleepData = sleep.data[0]
+    const sleepScore = dailySleepScores.data?.[0]?.score || null
+    
+    processedSleep = {
+      ...sleepData,
+      score: sleepScore,
+      // Ensure we have the correct field names
+      deep_sleep_duration: sleepData.deep_sleep_duration || sleepData.deep_sleep,
+      rem_sleep_duration: sleepData.rem_sleep_duration || sleepData.rem_sleep,
+      total_sleep_duration: sleepData.total_sleep_duration
+    }
+  }
+
   return {
-    sleep: {
-      ...sleep.data?.[0],
-      score: dailySleepScores.data?.[0]?.score || null
-    } || null,
+    sleep: processedSleep,
     activity: activity.data?.[0] || null,
     readiness: readiness.data?.[0] || null,
     timestamp: new Date().toISOString()
@@ -155,7 +168,11 @@ async function getHealthSummary(ouraToken: string, startDate?: string | null, en
       const scoreItem = (dailySleepScores.data || []).find(scoreItem => scoreItem.day === sleepItem.day)
       return {
         ...sleepItem,
-        score: scoreItem?.score || null
+        score: scoreItem?.score || null,
+        // Ensure we have the correct field names
+        deep_sleep_duration: sleepItem.deep_sleep_duration || sleepItem.deep_sleep,
+        rem_sleep_duration: sleepItem.rem_sleep_duration || sleepItem.rem_sleep,
+        total_sleep_duration: sleepItem.total_sleep_duration
       }
     })
     .reduce((acc, current) => {
@@ -303,9 +320,9 @@ async function storeData(supabase: any, userId: string, data: any, dataType: str
       case 'sleep':
         processedData.score = item.score
         processedData.total_sleep_duration = item.total_sleep_duration
-        processedData.deep_sleep_duration = item.deep_sleep_duration
-        processedData.rem_sleep_duration = item.rem_sleep_duration
-        processedData.light_sleep_duration = item.light_sleep_duration
+        processedData.deep_sleep_duration = item.deep_sleep_duration || item.deep_sleep
+        processedData.rem_sleep_duration = item.rem_sleep_duration || item.rem_sleep
+        processedData.light_sleep_duration = item.light_sleep_duration || item.light_sleep
         processedData.efficiency = item.efficiency
         processedData.latency = item.latency
         processedData.type = item.type
