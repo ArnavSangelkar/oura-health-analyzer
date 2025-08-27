@@ -68,28 +68,7 @@ const Dashboard: React.FC = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <div className="text-red-600 mb-4">{error}</div>
-        {error.includes('Oura API key not configured') ? (
-          <button 
-            onClick={() => window.location.href = '/settings'} 
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Go to Settings
-          </button>
-        ) : (
-          <button 
-            onClick={() => window.location.reload()} 
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Try Again
-          </button>
-        )}
-      </div>
-    );
-  }
+
 
   return (
     <div className="space-y-8">
@@ -216,6 +195,14 @@ const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {error ? (
+        <div className="text-center py-12">
+          <div className="text-red-600 mb-4">{error}</div>
+          <button onClick={loadData} className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+            Try Again
+          </button>
+        </div>
+      ) : null}
 
     </div>
   );
