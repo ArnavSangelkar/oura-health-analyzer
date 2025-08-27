@@ -37,10 +37,27 @@ const Dashboard: React.FC = () => {
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await ouraApi.getLatestData();
-      console.log('Dashboard received data:', data);
-      console.log('Sleep data:', data?.sleep);
-      setLatestData(data);
+      // Use getHealthSummary like HealthData does, but get the last 7 days
+      const endDate = new Date().toISOString().split('T')[0];
+      const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      
+      const data = await ouraApi.getHealthSummary(startDate, endDate);
+      console.log('Dashboard received health summary data:', data);
+      
+      // Extract the most recent data from the summary
+      const latestSleep = data.sleep && data.sleep.length > 0 ? data.sleep[data.sleep.length - 1] : null;
+      const latestActivity = data.activity && data.activity.length > 0 ? data.activity[data.activity.length - 1] : null;
+      const latestReadiness = data.readiness && data.readiness.length > 0 ? data.readiness[data.readiness.length - 1] : null;
+      
+      const latestData = {
+        sleep: latestSleep,
+        activity: latestActivity,
+        readiness: latestReadiness,
+        timestamp: new Date().toISOString()
+      };
+      
+      console.log('Processed latest data:', latestData);
+      setLatestData(latestData);
     } catch (err) {
       setError('Failed to load health data');
       console.error('Error loading dashboard data:', err);
