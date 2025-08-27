@@ -136,6 +136,9 @@ async function getLatestData(ouraToken: string, startDate?: string | null, endDa
     const sleepData = sleep.data[0]
     const sleepScore = dailySleepScores.data?.[0]?.score || null
     
+    console.log('Raw sleep data from API:', sleepData)
+    console.log('Available sleep fields:', Object.keys(sleepData))
+    
     processedSleep = {
       ...sleepData,
       score: sleepScore,
@@ -144,6 +147,10 @@ async function getLatestData(ouraToken: string, startDate?: string | null, endDa
       rem_sleep_duration: sleepData.rem_sleep_duration || sleepData.rem_sleep,
       total_sleep_duration: sleepData.total_sleep_duration
     }
+    
+    console.log('Processed sleep data:', processedSleep)
+  } else {
+    console.log('No sleep data found in response:', sleep)
   }
 
   return {
@@ -163,17 +170,28 @@ async function getHealthSummary(ouraToken: string, startDate?: string | null, en
   ])
 
   // Combine sleep data with scores and deduplicate by day
+  console.log('Raw sleep data from API:', sleep.data);
+  console.log('Raw daily sleep scores from API:', dailySleepScores.data);
+  
   const sleepWithScores = (sleep.data || [])
     .map(sleepItem => {
+      console.log('Processing sleep item:', sleepItem);
+      console.log('Available fields in sleep item:', Object.keys(sleepItem));
+      
       const scoreItem = (dailySleepScores.data || []).find(scoreItem => scoreItem.day === sleepItem.day)
-      return {
+      console.log('Found score item:', scoreItem);
+      
+      const processedItem = {
         ...sleepItem,
         score: scoreItem?.score || null,
         // Ensure we have the correct field names
         deep_sleep_duration: sleepItem.deep_sleep_duration || sleepItem.deep_sleep,
         rem_sleep_duration: sleepItem.rem_sleep_duration || sleepItem.rem_sleep,
         total_sleep_duration: sleepItem.total_sleep_duration
-      }
+      };
+      
+      console.log('Processed sleep item:', processedItem);
+      return processedItem;
     })
     .reduce((acc, current) => {
       const existing = acc.find(item => item.day === current.day)
@@ -196,7 +214,10 @@ async function getSleepData(ouraToken: string, startDate?: string | null, endDat
   if (startDate) params.append('start_date', startDate)
   if (endDate) params.append('end_date', endDate)
 
-  const response = await fetch(`https://api.ouraring.com/v2/usercollection/sleep?${params.toString()}`, {
+  const url = `https://api.ouraring.com/v2/usercollection/sleep?${params.toString()}`
+  console.log('Fetching sleep data from:', url)
+
+  const response = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${ouraToken}`,
       'Content-Type': 'application/json'
@@ -207,7 +228,9 @@ async function getSleepData(ouraToken: string, startDate?: string | null, endDat
     throw new Error(`Oura API error: ${response.status}`)
   }
 
-  return await response.json()
+  const data = await response.json()
+  console.log('Raw sleep API response:', data)
+  return data
 }
 
 async function getActivityData(ouraToken: string, startDate?: string | null, endDate?: string | null): Promise<any> {
