@@ -115,24 +115,24 @@ const HealthData: React.FC = () => {
       {hasOuraToken !== false && (
         <div className="card">
           <div className="flex items-center space-x-4">
-            <Calendar className="h-5 w-5 text-gray-500" />
-            <div className="flex items-center space-x-4">
+            <Calendar className="h-5 w-5 text-gray-500 flex-shrink-0" />
+            <div className="flex items-end space-x-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
                 <input
                   type="date"
                   value={dateRange.startDate}
                   onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-40"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1">End Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
                 <input
                   type="date"
                   value={dateRange.endDate}
                   onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-40"
                 />
               </div>
             </div>
