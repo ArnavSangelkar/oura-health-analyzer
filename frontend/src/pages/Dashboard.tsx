@@ -57,6 +57,8 @@ const Dashboard: React.FC = () => {
       };
       
       console.log('Processed latest data:', latestData);
+      console.log('Latest sleep data details:', latestSleep);
+      console.log('Sleep data keys:', latestSleep ? Object.keys(latestSleep) : 'No sleep data');
       setLatestData(latestData);
     } catch (err) {
       setError('Failed to load health data');
