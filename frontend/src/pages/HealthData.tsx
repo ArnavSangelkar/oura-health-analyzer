@@ -174,26 +174,28 @@ const HealthData: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Sleep Data</h2>
               {healthData?.sleep?.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Sleep (hrs)</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Efficiency</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {healthData.sleep.slice(-10).reverse().map((day: any, index: number) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.day}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.score}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(day.total_sleep_duration / 3600).toFixed(1)}h</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.efficiency || 0}%</td>
+                  <div className="max-h-96 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Score</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Total Sleep (hrs)</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Efficiency</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {healthData.sleep.reverse().map((day: any, index: number) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.day}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.score}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(day.total_sleep_duration / 3600).toFixed(1)}h</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.efficiency || 0}%</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <p className="text-gray-500">No sleep data available</p>
@@ -205,26 +207,28 @@ const HealthData: React.FC = () => {
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Activity Data</h2>
               {healthData?.activity?.length > 0 ? (
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Steps</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Calories</th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {healthData.activity.slice(-10).reverse().map((day: any, index: number) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.day}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.score}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.steps?.toLocaleString()}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.total_calories?.toLocaleString()}</td>
+                  <div className="max-h-96 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Date</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Score</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Steps</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Calories</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {healthData.activity.reverse().map((day: any, index: number) => (
+                          <tr key={index}>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.day}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.score}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.steps?.toLocaleString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{day.total_calories?.toLocaleString()}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <p className="text-gray-500">No activity data available</p>
